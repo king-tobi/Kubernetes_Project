@@ -1,13 +1,14 @@
 FROM centos:latest
 MAINTAINER ojelade.oluwadaniel@gmail.com
 
-# Create the repository configuration file
-RUN echo '[AppStream]' >> /etc/yum.repos.d/CentOS-AppStream.repo \
-    && echo 'name=CentOS Linux $releasever - AppStream' >> /etc/yum.repos.d/CentOS-AppStream.repo \
-    && echo 'mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=AppStream&infra=$infra' >> /etc/yum.repos.d/CentOS-AppStream.repo \
-    && echo 'gpgcheck=1' >> /etc/yum.repos.d/CentOS-AppStream.repo \
-    && echo 'enabled=1' >> /etc/yum.repos.d/CentOS-AppStream.repo \
-    && echo 'gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial' >> /etc/yum.repos.d/CentOS-AppStream.repo
+# Copy the repository configuration file to the container
+COPY CentOS-AppStream.repo /etc/yum.repos.d/CentOS-AppStream.repo
+
+# Modify the repository configuration
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-AppStream.repo \
+    && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-AppStream.repo \
+    && sudo yum update -y
+
 
 # Install required packages
 RUN yum install -y httpd zip unzip
@@ -23,6 +24,7 @@ RUN rm -rf photogenic photogenic.zip
 CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
 
 EXPOSE 80 22
+
 
 # FROM  centos:latest
 # MAINTAINER ojelade.oluwadaniel@gmail.com
