@@ -1,11 +1,9 @@
 FROM centos:latest
 MAINTAINER ojelade.oluwadaniel@gmail.com
 
-# Copy the repository configuration file to the container
-COPY CentOS-AppStream.repo /etc/yum.repos.d/CentOS-AppStream.repo
-
 # Modify the repository configuration
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-AppStream.repo \
+RUN cd /etc/yum.repos.d/  \
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-AppStream.repo \
     && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-AppStream.repo \
     && sudo yum update -y
 
