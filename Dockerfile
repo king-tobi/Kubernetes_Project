@@ -2,11 +2,10 @@ FROM centos:latest
 MAINTAINER ojelade.oluwadaniel@gmail.com
 
 # Modify the repository configuration
-RUN cd /etc/yum.repos.d/  \
-    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-AppStream.repo \
-    && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-AppStream.repo \
-    && sudo yum update -y
-
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN sudo yum update -y
 
 # Install required packages
 RUN yum install -y httpd zip unzip
