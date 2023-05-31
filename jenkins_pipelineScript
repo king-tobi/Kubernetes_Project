@@ -1,0 +1,38 @@
+node {
+    stage('Git checkout') {
+        git 'https://github.com/king-tobi/Kubernetes_Project.git'
+    }
+    
+    stage('sending Dockerfile to asible server over ssh '){
+        sshagent(['ansible_demo']) {
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233'
+            sh 'scp /var/lib/jenkins/workspace/kubernetes-pipeline/* ubuntu@10.0.0.233:/home/ubuntu'
+        }
+    }
+    
+    stage('Docker Build Image'){
+        sshagent(['ansible_demo']){
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 cd /home/ubuntu/'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image build -t $JOB_NAME:v1.$BUILD_ID .'
+        }
+    }
+    
+    stage('Docker Image tagging'){
+        sshagent(['ansible_demo']){
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 cd /home/ubuntu/'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image tag $JOB_NAME:v1.$BUILD_ID kingtobi/$JOB_NAME:v1.$BUILD_ID '
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image tag $JOB_NAME:v1.$BUILD_ID kingtobi/$JOB_NAME:latest '
+        }
+    }
+    
+    stage('Push docker images to docker hub '){
+        sshagent(['ansible_demo']){
+            withCredentials([string(credentialsId: 'dockerhub_password', variable: 'dockerhub_password')]) {
+                    sh "ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker login -u kingtobi -p ${dockerhub_password}"
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image push kingtobi/$JOB_NAME:v1.$BUILD_ID '
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image push kingtobi/$JOB_NAME:latest '
+            }
+            
+        }
+    }
+}
