@@ -17,4 +17,4 @@ spec:
           image: kingtobi/kubernetes-pipeline
           imagePullPolicy: Always
           ports:
-          - containerPort: 8080
+          - containerPort: 443
