@@ -3,7 +3,7 @@ node {
         git 'https://github.com/king-tobi/Kubernetes_Project.git'
     }
     
-    stage('sending Dockerfile to asible server over ssh '){
+    stage('sending Dockerfile to ansible server over ssh '){
         sshagent(['ansible_demo']) {
             sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233'
             sh 'scp /var/lib/jenkins/workspace/kubernetes-pipeline/* ubuntu@10.0.0.233:/home/ubuntu'
@@ -31,8 +31,31 @@ node {
                     sh "ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker login -u kingtobi -p ${dockerhub_password}"
                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image push kingtobi/$JOB_NAME:v1.$BUILD_ID '
                     sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image push kingtobi/$JOB_NAME:latest '
+                    
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo docker image rm kingtobi/$JOB_NAME:v1.$BUILD_ID kingtobi/$JOB_NAME:latest $JOB_NAME:v1.$BUILD_ID'
             }
             
         }
     }
+    
+    stage('Copy files from jenkins to kubernetes server'){
+        sshagent(['kubernetes_server']) {
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.73 '
+            sh 'scp /var/lib/jenkins/workspace/kubernetes-pipeline/* ubuntu@10.0.0.73:/home/ubuntu'
+        }
+    }
+    
+    stage('Kubernetes Deployment using ansible'){
+        sshagent(['kubernetes_server']) {
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu10.0.0.73 minikube start' 
+        }
+        sshagent(['ansible_demo']){
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 '
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo ansible -m ping node'
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 sudo ansible-playbook ansible.yml' 
+        }
+    }
 }
+
+
+
