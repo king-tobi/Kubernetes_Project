@@ -47,7 +47,7 @@ node {
     
     stage('Kubernetes Deployment using ansible'){
         sshagent(['kubernetes_server']) {
-            sh 'ssh -o StrictHostKeyChecking=no ubuntu10.0.0.73 minikube start' 
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.73 minikube start' 
         }
         sshagent(['ansible_demo']){
             sh 'ssh -o StrictHostKeyChecking=no ubuntu@10.0.0.233 '
