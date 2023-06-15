@@ -10,10 +10,10 @@ spec:
    template:
       metadata:
         labels:
-          app: TobiDevops
+          app: tobiDevops
       spec:
        containers:
-        - name: tobiDevops
+        - name: tobi-container
           image: kingtobi/kubernetes-pipeline
           imagePullPolicy: Always
           ports:
